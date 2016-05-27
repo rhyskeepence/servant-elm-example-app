@@ -1,4 +1,4 @@
-module Events (onChange, onEnter, onSubmitPreventDefault) where
+module Events exposing (onChange, onEnter, onSubmitPreventDefault)
 
 {-| Extensions to the Html.Events library.
 
@@ -8,15 +8,13 @@ module Events (onChange, onEnter, onSubmitPreventDefault) where
 import Html exposing (Attribute)
 import Html.Events exposing (..)
 import Json.Decode as Json
-import Signal exposing (..)
 
 
-onEnter : Address a -> a -> Attribute
-onEnter address value =
+onEnter : (() -> a) -> Attribute a
+onEnter tagger =
   on
     "keydown"
-    (Json.customDecoder keyCode is13)
-    (\_ -> Signal.message address value)
+    (Json.map tagger (Json.customDecoder keyCode is13))
 
 
 is13 : Int -> Result String ()
@@ -27,14 +25,13 @@ is13 code =
     Err "not the right key code"
 
 
-onChange : Address a -> (String -> a) -> Html.Attribute
-onChange address f =
-  on "input" targetValue (message (forwardTo address f))
+onChange : (String -> a) -> Html.Attribute a
+onChange f =
+  on "input" (Json.map f targetValue)
 
 
-onSubmitPreventDefault address message =
+onSubmitPreventDefault message =
   onWithOptions
     "submit"
     { defaultOptions | preventDefault = True }
-    Json.value
-    (\_ -> Signal.message address message)
+    (Json.succeed message)

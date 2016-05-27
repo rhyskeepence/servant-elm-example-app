@@ -11,8 +11,8 @@ packages:
     commit: df293bf15fbc857499f2e2f12bdf290409a08741
   extra-dep: True
 - location:
-    git: https://www.github.com/mattjbray/elm-export
-    commit: 8868c1f09597f44c2e18e014cd9fbcf8320c3fea
+    git: https://www.github.com/jcberentsen/elm-export
+    commit: 894649652bd8c467b77ce761ba55627700736ab3
   extra-dep: True
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)

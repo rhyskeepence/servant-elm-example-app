@@ -1,4 +1,4 @@
-module Generated.Api where
+module Generated.Api exposing (..)
 
 import Json.Decode exposing ((:=))
 import Json.Decode.Extra exposing ((|:))

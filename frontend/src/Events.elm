@@ -14,7 +14,7 @@ onEnter : (() -> a) -> Attribute a
 onEnter tagger =
   on
     "keydown"
-    (Json.map tagger (Json.customDecoder keyCode is13))
+    (Json.map tagger (customDecoder keyCode is13))
 
 
 is13 : Int -> Result String ()
@@ -35,3 +35,12 @@ onSubmitPreventDefault message =
     "submit"
     { defaultOptions | preventDefault = True }
     (Json.succeed message)
+
+customDecoder decoder toResult = 
+   Json.andThen
+             (\a ->
+                   case toResult a of 
+                      Ok b -> Json.succeed b
+                      Err err -> Json.fail err
+             )
+             decoder

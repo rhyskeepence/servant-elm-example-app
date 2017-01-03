@@ -1,17 +1,15 @@
 module Main exposing (..)
 
-import Html exposing (div, button, text, input, p, h1, h2, form)
-import Html.Attributes exposing (placeholder, value, type', class)
+import Html exposing (div, button, text, input, p, h1, h2, form, program)
+import Html.Attributes exposing (placeholder, value, type_, class)
 import Html.Events exposing (onClick)
-import Html.App as Html
 import String
 import Json.Decode as Json
 import Events exposing (onChange, onEnter, onSubmitPreventDefault)
 import Generated.Api exposing (..)
 import Task
-
-
-import Html.App as Html
+import Http
+import Result
 
 main =
   Html.program
@@ -42,11 +40,12 @@ initModel =
 
 type Action
   = FetchBooks
-  | SetBooks (Maybe (List Book))
+  | SetBooks (Result Http.Error (List Book))
   | SetNewBookTitle String
   | SetNewBookAuthorName String
   | SetNewBookAuthorYearOfBirth Int
   | CreateBook
+  | CreatedBook (Result Http.Error (Book))
 
 
 update : Action -> Model -> ( Model, Cmd Action )
@@ -56,7 +55,7 @@ update action model =
       fetchBooks model
 
     SetBooks mNewBooks ->
-      pure { model | books = Maybe.withDefault model.books mNewBooks }
+      pure { model | books = Result.withDefault model.books mNewBooks }
 
     SetNewBookTitle title ->
       pure { model | newBookTitle = title }
@@ -78,21 +77,23 @@ update action model =
                 , yearOfBirth = model.newBookAuthorYearOfBirth
                 }
             }
-            |> Task.toMaybe
-            |> Task.map (always FetchBooks)
-            |> Task.perform identity identity
+            |> Http.send CreatedBook
         )
       else
         pure model
 
+    CreatedBook newBook ->
+      pure { model | books = 
+        case newBook of
+          Ok value -> value :: model.books
+          Err err -> model.books
+      }
 
 fetchBooks : Model -> ( Model, Cmd Action )
 fetchBooks model =
   ( model
   , getBooks
-      |> Task.toMaybe
-      |> Task.map SetBooks
-      |> Task.perform identity identity
+      |> Http.send SetBooks
   )
 
 
@@ -163,13 +164,13 @@ viewBookForm model =
                     [ placeholder "Date of birth"
                     , class "form-control"
                     , value (toString model.newBookAuthorYearOfBirth)
-                    , type' "number"
+                    , type_ "number"
                     , onChange (SetNewBookAuthorYearOfBirth << Maybe.withDefault 0 << Result.toMaybe << String.toInt)
                     ]
                     []
                 ]
             , button
-                [ type' "submit"
+                [ type_ "submit"
                 , class "btn btn-default"
                 ]
                 [ text "Create book" ]

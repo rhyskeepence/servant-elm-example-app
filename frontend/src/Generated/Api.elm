@@ -55,7 +55,7 @@ getBooks =
             []
         , url =
             String.join "/"
-                [ ""
+                [ "/api"
                 , "books"
                 ]
         , body =
@@ -77,7 +77,7 @@ postBooks body =
             []
         , url =
             String.join "/"
-                [ ""
+                [ "/api"
                 , "books"
                 ]
         , body =

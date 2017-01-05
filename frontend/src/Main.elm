@@ -83,11 +83,7 @@ update action model =
         pure model
 
     CreatedBook newBook ->
-      pure { model | books = 
-        case newBook of
-          Ok value -> value :: model.books
-          Err err -> model.books
-      }
+      fetchBooks model
 
 fetchBooks : Model -> ( Model, Cmd Action )
 fetchBooks model =

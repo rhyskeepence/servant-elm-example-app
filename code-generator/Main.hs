@@ -7,14 +7,14 @@ module Main where
 import           Data.Proxy  (Proxy (Proxy))
 import           Elm         (Spec (Spec), specsToDir, toElmTypeSource, toElmDecoderSource, toElmEncoderSource)
 import           Servant.Elm (ElmOptions (..), defElmImports, defElmOptions,
-                              generateElmForAPI)
+                              generateElmForAPIWith)
 
 import           Api.Types   (Api, Book, Author)
 
 elmOpts :: ElmOptions
 elmOpts =
   defElmOptions
-    { urlPrefix = "http://localhost:8000/api" }
+    { urlPrefix = "/api" }
 
 specs :: Spec
 specs = Spec ["Generated", "Api"]
@@ -25,7 +25,9 @@ specs = Spec ["Generated", "Api"]
              : toElmTypeSource    (Proxy :: Proxy Author)
              : toElmDecoderSource (Proxy :: Proxy Author)
              : toElmEncoderSource (Proxy :: Proxy Author)
-             : generateElmForAPI  (Proxy :: Proxy Api))
+             : generateElmForAPIWith
+                elmOpts  
+                (Proxy :: Proxy Api))
 
 main :: IO ()
 main = specsToDir [specs] "frontend/src"
